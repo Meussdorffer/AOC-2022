@@ -15,9 +15,10 @@ const (
 	Scissors
 )
 
+type Result int64
+
 const (
-	Undefined Result = iota
-	Lose
+	Lose Result = iota
 	Draw
 	Win
 )
@@ -47,8 +48,21 @@ func getPlayerMove(opponentMove Move, playerResult Result) Move {
 		result  Result
 	}
 
-	m := make(map[key]MediaItem)
-	m[key{oppMove: opponentMove, result: playerResult}] = MediaItem{}
+	m := map[key]Move{
+		key{Rock, Lose}: Scissors,
+		key{Rock, Draw}: Rock,
+		key{Rock, Win}:  Paper,
+
+		key{Paper, Lose}: Rock,
+		key{Paper, Draw}: Paper,
+		key{Paper, Win}:  Scissors,
+
+		key{Scissors, Lose}: Paper,
+		key{Scissors, Draw}: Scissors,
+		key{Scissors, Win}:  Rock,
+	}
+
+	return m[key{opponentMove, playerResult}]
 }
 
 func main() {
@@ -66,7 +80,7 @@ func main() {
 		"C": Scissors,
 	}
 
-	playerStrategy := map[string]Move{
+	playerStrategy := map[string]Result{
 		"X": Lose,
 		"Y": Draw,
 		"Z": Win,
@@ -77,7 +91,7 @@ func main() {
 		moves := strings.Split(game, " ")
 		opponentMove := opponentStrategy[moves[0]]
 		playerResult := playerStrategy[moves[1]]
-		playerMove := Rock
+		playerMove := getPlayerMove(opponentMove, playerResult)
 		totalPoints += gameResult(opponentMove, playerMove)
 	}
 
