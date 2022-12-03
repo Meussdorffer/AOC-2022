@@ -41,7 +41,6 @@ func gameResult(opponentMove Move, playerMove Move) int {
 	return resultPoints + int(playerMove)
 }
 
-// TODO: fix
 func getPlayerMove(opponentMove Move, playerResult Result) Move {
 	type key struct {
 		oppMove Move
