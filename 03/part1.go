@@ -6,31 +6,54 @@ import (
 	"strings"
 )
 
-type Move int64
+// returns the compartment size for both compartments within a given rucksack.
+func compartmentSize(rucksack string) int {
+	return len(rucksack) / 2
+}
 
-const (
-	Undefined Move = iota
-	Rock
-	Paper
-	Scissors
-)
+// splits rucksack into two compartments of equal length.
+func splitRucksack(rucksack string) (string, string) {
+	compSize := compartmentSize(rucksack)
+	r1 := rucksack[:compSize]
+	r2 := rucksack[compSize:]
 
-func game_result(opponentMove Move, playerMove Move) int {
+	return r1, r2
+}
 
-	resultPoints := 0 // base case: loss
-	playerWin := (playerMove == Rock && opponentMove == Scissors) ||
-		(playerMove == Paper && opponentMove == Rock) ||
-		(playerMove == Scissors && opponentMove == Paper)
+// identifies the common item appearing in both rucksack compartments.
+func compareCompartments(rucksack string) rune {
+	c1, c2 := splitRucksack(rucksack)
 
-	if playerMove == opponentMove {
-		// draw
-		resultPoints = 3
-	} else if playerWin {
-		// win
-		resultPoints = 6
+	// make maps of each rune in string.
+	m1 := make(map[rune]bool)
+	for _, char := range c1 {
+		m1[char] = true
 	}
 
-	return resultPoints + int(playerMove)
+	m2 := make(map[rune]bool)
+	for _, char := range c2 {
+		m2[char] = true
+	}
+
+	// find common rune in each map.
+	var commonRune rune
+	for char, _ := range m1 {
+		if _, ok := m2[char]; ok {
+			commonRune = char
+		}
+	}
+
+	return commonRune
+}
+
+func convertRuneToPriority(char rune) int {
+	priority := int(char)
+	if priority >= 97 {
+		priority -= 96 // sets "a" to 1
+	} else if priority < 97 {
+		priority -= 38 // sets "A" to 27
+	}
+	return priority
 }
 
 func main() {
@@ -42,20 +65,11 @@ func main() {
 
 	fileContent := string(file)
 
-	strategy := map[string]Move{
-		"A": Rock,
-		"B": Paper,
-		"C": Scissors,
-		"X": Rock,
-		"Y": Paper,
-		"Z": Scissors,
+	prioritySum := 0
+	for _, rucksack := range strings.Split(fileContent, "\n") {
+		commonElement := compareCompartments(rucksack)
+		prioritySum += convertRuneToPriority((commonElement))
 	}
 
-	totalPoints := 0
-	for _, game := range strings.Split(fileContent, "\n") {
-		moves := strings.Split(game, " ")
-		totalPoints += game_result(strategy[moves[0]], strategy[moves[1]])
-	}
-
-	fmt.Println(totalPoints)
+	fmt.Println(prioritySum)
 }
