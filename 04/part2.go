@@ -30,12 +30,12 @@ func parseAssignmentPair(pair string) (assignment, assignment) {
 }
 
 // Compare assignment pairs for overlapping assignments.
-// Returns 1 if pairs overlap, 0 otherwise.
+// Returns 1 if pairs partially overlap, 0 otherwise.
 func checkAssignmentsOverlap(a1 assignment, a2 assignment) int {
 	overlap := 0
 
-	if a1.low <= a2.low && a1.high >= a2.high ||
-		a2.low <= a1.low && a2.high >= a1.high {
+	if a1.high >= a2.low && a1.low <= a2.low ||
+		a2.high >= a1.low && a2.low <= a1.low {
 		overlap = 1
 	}
 
