@@ -40,6 +40,7 @@ func readInputs(inputFile string) ([]string, []string) {
 	return drawingInput, commandInput
 }
 
+// parses the portion of the input specificng the current state of each crate stack.
 func parseDrawing(drawingInput []string) []Stack {
 	fileWidth := len(drawingInput[0])
 	numStacks := fileWidth / int(crateLen)
@@ -65,6 +66,7 @@ func parseDrawing(drawingInput []string) []Stack {
 	return crateStacks
 }
 
+// parses the portion of the input specificng the CrateMover commands.
 func parseCommands(commandInput []string) []Command {
 	var commands []Command
 
@@ -91,8 +93,8 @@ func parseCommands(commandInput []string) []Command {
 	return commands
 }
 
-// issues all commands to move crates between stacks.
-func moveCrates(crateStacks []Stack, commands []Command) []Stack {
+// issues all commands to move crates between stacks using CrateMover9000.
+func crateMover9000(crateStacks []Stack, commands []Command) []Stack {
 	for _, command := range commands {
 		for i := 0; i < command.quantity; i++ {
 			crate, success := crateStacks[command.fromStack].Pop()
@@ -108,6 +110,44 @@ func moveCrates(crateStacks []Stack, commands []Command) []Stack {
 	return crateStacks
 }
 
+// issues all commands to move crates between stacks using CrateMover9001
+// (i.e., multiple crates moved at once are done so in-order)
+func crateMover9001(crateStacks []Stack, commands []Command) []Stack {
+	for _, command := range commands {
+
+		// we can maintain order when moving multiple crates in a stack by using a Stack.
+		var bufferStack Stack
+
+		for i := 0; i < command.quantity; i++ {
+			crate, success := crateStacks[command.fromStack].Pop()
+			if !success {
+				fmt.Printf("Failed to pop from stack %d \n", command.fromStack)
+				os.Exit(1)
+			}
+
+			bufferStack.Push(crate)
+		}
+
+		// unload the crates in the bufferStack into the destination stack in-order.
+		for !bufferStack.isEmpty() {
+			crate, _ := bufferStack.Pop()
+			crateStacks[command.toStack].Push(crate)
+		}
+	}
+
+	return crateStacks
+}
+
+// get topmost crate in each stack to form solution message.
+func buildCrateMessage(stacks []Stack) string {
+	var message []string
+	for _, stack := range stacks {
+		char, _ := stack.Pop()
+		message = append(message, char)
+	}
+	return strings.Join(message, "")
+}
+
 func main() {
 	inputFile := os.Args[1]
 	file, err := os.ReadFile(inputFile)
@@ -117,19 +157,18 @@ func main() {
 
 	// parse input.
 	drawingInput, commandInput := readInputs(string(file))
-	crateStacks := parseDrawing(drawingInput)
+	crateStacks1 := parseDrawing(drawingInput)
+	crateStacks2 := parseDrawing(drawingInput)
 	commands := parseCommands(commandInput)
 
-	// apply commands.
-	sortedStacks := moveCrates(crateStacks, commands)
+	var sortedStacks []Stack
 
-	// get topmost crate in each stack to form solution message (part 1).
-	var message []string
-	for _, stack := range sortedStacks {
-		char, _ := stack.Pop()
-		message = append(message, char)
-	}
+	// Part 1
+	sortedStacks = crateMover9000(crateStacks1, commands)
+	fmt.Println(buildCrateMessage(sortedStacks))
 
-	fmt.Println(strings.Join(message, ""))
+	// Part 2
+	sortedStacks = crateMover9001(crateStacks2, commands)
+	fmt.Println(buildCrateMessage(sortedStacks))
 
 }
