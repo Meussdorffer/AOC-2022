@@ -107,4 +107,17 @@ func main() {
 	}
 	fmt.Printf("\ncombined size of all dirs <= 100000: %d\n", dirSize)
 
+	// part 2
+	totalDiskSpace := 70000000
+	spaceReq := 30000000
+	spaceRemaining := totalDiskSpace - root.size
+	spaceToDel := spaceReq - spaceRemaining
+	delNode := root
+
+	for _, node := range dirs {
+		if node.size >= spaceToDel && node.size < delNode.size {
+			delNode = node
+		}
+	}
+	fmt.Printf("\ndir to delete: %s size=%d\n", delNode.name, delNode.size)
 }
