@@ -71,7 +71,7 @@ func reverseSlice(slice []int) []int {
 	return reversedSlice
 }
 
-// determines the number of visible trees (part 1)
+// determines the number of visible trees (part 1).
 func calcVisibleTrees(arr [][]int, arrT [][]int) int {
 	nRows := len(arr)
 	nCols := len(arr[0])
@@ -94,7 +94,7 @@ func calcVisibleTrees(arr [][]int, arrT [][]int) int {
 	return visibleTrees
 }
 
-// calculates the max scenic score for every tree in the array.
+// calculates the max scenic score for every tree in the array (part 2).
 func calcMaxScenicScore(arr [][]int, arrT [][]int) int {
 	nRows := len(arr)
 	nCols := len(arr[0])
