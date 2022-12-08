@@ -16,6 +16,7 @@ type Node struct {
 	parent   *Node
 }
 
+// helper function to create new nodes
 func newNode(t string, n string, s int, p *Node) *Node {
 	return &Node{
 		ftype:    t,
@@ -66,6 +67,7 @@ func buildDirTree(input string) (*Node, []*Node) {
 	return root, dirs
 }
 
+// traverse the tree to propagate dir sizes from leaf nodes to root node
 func calcDirSize(node *Node) int {
 	for _, child := range node.children {
 		node.size += calcDirSize(child)
@@ -74,6 +76,7 @@ func calcDirSize(node *Node) int {
 	return node.size
 }
 
+// print out the tree for inspection
 func printTree(node *Node, depth int) {
 	fmt.Printf(
 		"%s - %s (%s, size=%d)\n",
@@ -94,6 +97,7 @@ func main() {
 		fmt.Printf("Could not read the file due to error: %s \n", err)
 	}
 
+	// build and calculate tree size
 	root, dirs := buildDirTree(string(file))
 	calcDirSize(root)
 	printTree(root, 0)
