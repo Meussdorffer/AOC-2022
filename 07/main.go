@@ -103,6 +103,7 @@ func main() {
 	printTree(root, 0)
 
 	// part 1
+	// sum all dir node sizes that meet size requirement.
 	dirSize := 0
 	for _, node := range dirs {
 		if node.size <= 100000 {
@@ -112,6 +113,7 @@ func main() {
 	fmt.Printf("\ncombined size of all dirs <= 100000: %d\n", dirSize)
 
 	// part 2
+	// loop through dir nodes to find the minimum valid dir to delete.
 	totalDiskSpace := 70000000
 	spaceReq := 30000000
 	spaceRemaining := totalDiskSpace - root.size
