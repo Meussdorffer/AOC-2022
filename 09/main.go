@@ -20,7 +20,7 @@ func Abs(x int) int {
 }
 
 // issues commands to move the head of a rope with N number of knots.
-// returns the positions visited by the final knot in the rope.
+// returns the number of distinct positions visited by the final knot in the rope.
 func moveRope(nKnots int, commands []string) int {
 	var rope []Knot
 	for i := 0; i < nKnots; i++ {
