@@ -7,15 +7,10 @@ import (
 	"strings"
 )
 
-//	type Rope struct {
-//		headX int
-//		headY int
-//		tailX int
-//		tailY int
-//	}
 type Knot struct {
-	x int
-	y int
+	x                 int
+	y                 int
+	distinctPositions map[[2]int]bool
 }
 
 func Abs(x int) int {
@@ -25,21 +20,40 @@ func Abs(x int) int {
 	return x
 }
 
-// func moveRope(knots int, commands []string) []{
+// used for printing rope state to stdout to compare with examples for debugging.
+func printRope(rope []Knot) {
+	gridRows := 21
+	sX, sY := 15, 11
 
-// }
-
-func main() {
-	inputFile := os.Args[1]
-	file, err := os.ReadFile(inputFile)
-	if err != nil {
-		fmt.Printf("Could not read the file due to error: %s \n", err)
+	var charr [][]string
+	for i := 0; i < gridRows; i++ {
+		charr = append(charr, strings.Split("..........................", ""))
 	}
 
-	commands := strings.Split(string(file), "\n")
-	head := Knot{0, 0}
-	tail := Knot{0, 0}
-	var distinctTailPositions = map[[2]int]bool{{0, 0}: true}
+	charr[sX][sY] = "s"
+
+	for i := len(rope) - 1; i >= 0; i-- {
+		knot := rope[i]
+		if i == 0 {
+			charr[sX-knot.y][knot.x+sY] = "H"
+		} else {
+			charr[sX-knot.y][knot.x+sY] = fmt.Sprintf("%d", i)
+		}
+	}
+
+	for _, line := range charr {
+		fmt.Println(strings.Join(line, ""))
+	}
+	fmt.Println("\n\n")
+}
+
+func moveRope(nKnots int, commands []string) []Knot {
+	var rope []Knot
+	for i := 0; i < nKnots; i++ {
+		rope = append(rope, Knot{0, 0, map[[2]int]bool{{0, 0}: true}})
+	}
+
+	var ropeHead *Knot = &rope[0]
 
 	for _, command := range commands {
 		dir := string(command[0])
@@ -49,63 +63,88 @@ func main() {
 			// apply head movement.
 			switch dir {
 			case "R":
-				head.x++
+				ropeHead.x++
 			case "L":
-				head.x--
+				ropeHead.x--
 			case "U":
-				head.y++
+				ropeHead.y++
 			case "D":
-				head.y--
+				ropeHead.y--
 			}
 
-			tailNeighbors := map[[2]int]bool{
-				{tail.x, tail.y}:         true, // same position
-				{tail.x + 1, tail.y}:     true, // right
-				{tail.x - 1, tail.y}:     true, // left
-				{tail.x, tail.y + 1}:     true, // up
-				{tail.x, tail.y - 1}:     true, // down
-				{tail.x + 1, tail.y + 1}: true, // upright
-				{tail.x - 1, tail.y + 1}: true, // upleft
-				{tail.x + 1, tail.y - 1}: true, // downright
-				{tail.x - 1, tail.y - 1}: true, // downleft
-			}
+			for knotIdx := 1; knotIdx < nKnots; knotIdx++ {
+				var head *Knot = &rope[knotIdx-1]
+				var tail *Knot = &rope[knotIdx]
 
-			// move tail if head is no longer its neighbor (or in same position).
-			if !tailNeighbors[[2]int{head.x, head.y}] {
-				// if head and tail don't share a row or column, we need the tail to move diagonally.
-				sameRow := head.y == tail.y
-				sameCol := head.x == tail.x
+				tailNeighbors := map[[2]int]bool{
+					{tail.x, tail.y}:         true, // same position
+					{tail.x + 1, tail.y}:     true, // right
+					{tail.x - 1, tail.y}:     true, // left
+					{tail.x, tail.y + 1}:     true, // up
+					{tail.x, tail.y - 1}:     true, // down
+					{tail.x + 1, tail.y + 1}: true, // upright
+					{tail.x - 1, tail.y + 1}: true, // upleft
+					{tail.x + 1, tail.y - 1}: true, // downright
+					{tail.x - 1, tail.y - 1}: true, // downleft
+				}
 
-				switch dir {
-				case "R":
-					tail.x++
-					if !(sameCol || sameRow) {
-						tail.y = head.y
-					}
-				case "L":
-					tail.x--
-					if !(sameCol || sameRow) {
-						tail.y = head.y
-					}
-				case "U":
-					tail.y++
-					if !(sameCol || sameRow) {
-						tail.x = head.x
-					}
-				case "D":
-					tail.y--
-					if !(sameCol || sameRow) {
-						tail.x = head.x
+				// move tail if head is no longer its neighbor (or in same position).
+				if !tailNeighbors[[2]int{head.x, head.y}] {
+					// if head and tail don't share a row or column, we need the tail to move diagonally.
+					sameRow := head.y == tail.y
+					sameCol := head.x == tail.x
+
+					if sameRow {
+						if head.x-tail.x > 0 {
+							tail.x++
+						} else {
+							tail.x--
+						}
+					} else if sameCol {
+						if head.y-tail.y > 0 {
+							tail.y++
+						} else {
+							tail.y--
+						}
+					} else {
+						if head.x-tail.x > 0 {
+							tail.x++
+						} else {
+							tail.x--
+						}
+
+						if head.y-tail.y > 0 {
+							tail.y++
+						} else {
+							tail.y--
+						}
 					}
 				}
+
+				tail.distinctPositions[[2]int{tail.x, tail.y}] = true
+
 			}
-
-			distinctTailPositions[[2]int{tail.x, tail.y}] = true
-
-			fmt.Println(head, tail)
 		}
 	}
+	// printRope(rope)
+
+	return rope
+}
+
+func main() {
+	inputFile := os.Args[1]
+	file, err := os.ReadFile(inputFile)
+	if err != nil {
+		fmt.Printf("Could not read the file due to error: %s \n", err)
+	}
+
+	commands := strings.Split(string(file), "\n")
 
 	// part 1
-	fmt.Println(len(distinctTailPositions))
+	movedRope2Knots := moveRope(2, commands)
+	fmt.Println(len(movedRope2Knots[len(movedRope2Knots)-1].distinctPositions))
+
+	// part 2
+	movedRope10Knots := moveRope(10, commands)
+	fmt.Println(len(movedRope10Knots[len(movedRope10Knots)-1].distinctPositions))
 }
