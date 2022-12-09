@@ -20,33 +20,8 @@ func Abs(x int) int {
 	return x
 }
 
-// used for printing rope state to stdout to compare with examples for debugging.
-func printRope(rope []Knot) {
-	gridRows := 21
-	sX, sY := 15, 11
-
-	var charr [][]string
-	for i := 0; i < gridRows; i++ {
-		charr = append(charr, strings.Split("..........................", ""))
-	}
-
-	charr[sX][sY] = "s"
-
-	for i := len(rope) - 1; i >= 0; i-- {
-		knot := rope[i]
-		if i == 0 {
-			charr[sX-knot.y][knot.x+sY] = "H"
-		} else {
-			charr[sX-knot.y][knot.x+sY] = fmt.Sprintf("%d", i)
-		}
-	}
-
-	for _, line := range charr {
-		fmt.Println(strings.Join(line, ""))
-	}
-	fmt.Println("\n\n")
-}
-
+// issues commands to move the head of a rope with N number of knots.
+// returns the state of each knot in the rope.
 func moveRope(nKnots int, commands []string) []Knot {
 	var rope []Knot
 	for i := 0; i < nKnots; i++ {
@@ -88,36 +63,14 @@ func moveRope(nKnots int, commands []string) []Knot {
 					{tail.x - 1, tail.y - 1}: true, // downleft
 				}
 
-				// move tail if head is no longer its neighbor (or in same position).
+				// move tail in direction of head if head is not a neighbor.
 				if !tailNeighbors[[2]int{head.x, head.y}] {
-					// if head and tail don't share a row or column, we need the tail to move diagonally.
-					sameRow := head.y == tail.y
-					sameCol := head.x == tail.x
+					if tail.x != head.x {
+						tail.x += (head.x - tail.x) / Abs(head.x-tail.x)
+					}
 
-					if sameRow {
-						if head.x-tail.x > 0 {
-							tail.x++
-						} else {
-							tail.x--
-						}
-					} else if sameCol {
-						if head.y-tail.y > 0 {
-							tail.y++
-						} else {
-							tail.y--
-						}
-					} else {
-						if head.x-tail.x > 0 {
-							tail.x++
-						} else {
-							tail.x--
-						}
-
-						if head.y-tail.y > 0 {
-							tail.y++
-						} else {
-							tail.y--
-						}
+					if tail.y != head.y {
+						tail.y += (head.y - tail.y) / Abs(head.y-tail.y)
 					}
 				}
 
@@ -126,7 +79,6 @@ func moveRope(nKnots int, commands []string) []Knot {
 			}
 		}
 	}
-	// printRope(rope)
 
 	return rope
 }
