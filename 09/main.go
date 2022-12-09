@@ -7,11 +7,15 @@ import (
 	"strings"
 )
 
-type Rope struct {
-	headX int
-	headY int
-	tailX int
-	tailY int
+//	type Rope struct {
+//		headX int
+//		headY int
+//		tailX int
+//		tailY int
+//	}
+type Knot struct {
+	x int
+	y int
 }
 
 func Abs(x int) int {
@@ -21,6 +25,10 @@ func Abs(x int) int {
 	return x
 }
 
+// func moveRope(knots int, commands []string) []{
+
+// }
+
 func main() {
 	inputFile := os.Args[1]
 	file, err := os.ReadFile(inputFile)
@@ -29,7 +37,8 @@ func main() {
 	}
 
 	commands := strings.Split(string(file), "\n")
-	rope := Rope{0, 0, 0, 0}
+	head := Knot{0, 0}
+	tail := Knot{0, 0}
 	var distinctTailPositions = map[[2]int]bool{{0, 0}: true}
 
 	for _, command := range commands {
@@ -40,60 +49,60 @@ func main() {
 			// apply head movement.
 			switch dir {
 			case "R":
-				rope.headX++
+				head.x++
 			case "L":
-				rope.headX--
+				head.x--
 			case "U":
-				rope.headY++
+				head.y++
 			case "D":
-				rope.headY--
+				head.y--
 			}
 
 			tailNeighbors := map[[2]int]bool{
-				{rope.tailX, rope.tailY}:         true, // same position
-				{rope.tailX + 1, rope.tailY}:     true, // right
-				{rope.tailX - 1, rope.tailY}:     true, // left
-				{rope.tailX, rope.tailY + 1}:     true, // up
-				{rope.tailX, rope.tailY - 1}:     true, // down
-				{rope.tailX + 1, rope.tailY + 1}: true, // upright
-				{rope.tailX - 1, rope.tailY + 1}: true, // upleft
-				{rope.tailX + 1, rope.tailY - 1}: true, // downright
-				{rope.tailX - 1, rope.tailY - 1}: true, // downleft
+				{tail.x, tail.y}:         true, // same position
+				{tail.x + 1, tail.y}:     true, // right
+				{tail.x - 1, tail.y}:     true, // left
+				{tail.x, tail.y + 1}:     true, // up
+				{tail.x, tail.y - 1}:     true, // down
+				{tail.x + 1, tail.y + 1}: true, // upright
+				{tail.x - 1, tail.y + 1}: true, // upleft
+				{tail.x + 1, tail.y - 1}: true, // downright
+				{tail.x - 1, tail.y - 1}: true, // downleft
 			}
 
 			// move tail if head is no longer its neighbor (or in same position).
-			if !tailNeighbors[[2]int{rope.headX, rope.headY}] {
+			if !tailNeighbors[[2]int{head.x, head.y}] {
 				// if head and tail don't share a row or column, we need the tail to move diagonally.
-				sameRow := rope.headY == rope.tailY
-				sameCol := rope.headX == rope.tailX
+				sameRow := head.y == tail.y
+				sameCol := head.x == tail.x
 
 				switch dir {
 				case "R":
-					rope.tailX++
+					tail.x++
 					if !(sameCol || sameRow) {
-						rope.tailY = rope.headY
+						tail.y = head.y
 					}
 				case "L":
-					rope.tailX--
+					tail.x--
 					if !(sameCol || sameRow) {
-						rope.tailY = rope.headY
+						tail.y = head.y
 					}
 				case "U":
-					rope.tailY++
+					tail.y++
 					if !(sameCol || sameRow) {
-						rope.tailX = rope.headX
+						tail.x = head.x
 					}
 				case "D":
-					rope.tailY--
+					tail.y--
 					if !(sameCol || sameRow) {
-						rope.tailX = rope.headX
+						tail.x = head.x
 					}
 				}
 			}
 
-			distinctTailPositions[[2]int{rope.tailX, rope.tailY}] = true
+			distinctTailPositions[[2]int{tail.x, tail.y}] = true
 
-			fmt.Println(rope)
+			fmt.Println(head, tail)
 		}
 	}
 
