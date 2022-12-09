@@ -27,8 +27,8 @@ func moveRope(nKnots int, commands []string) int {
 		rope = append(rope, Knot{0, 0})
 	}
 
-	var ropeHead *Knot = &rope[0]
-	var ropeTail *Knot = &rope[nKnots-1]
+	ropeHead := &rope[0]
+	ropeTail := &rope[nKnots-1]
 
 	tailPositions := map[[2]int]bool{{0, 0}: true}
 	for _, command := range commands {
@@ -50,8 +50,8 @@ func moveRope(nKnots int, commands []string) int {
 
 			// apply movement for all other knots.
 			for knotIdx := 1; knotIdx < nKnots; knotIdx++ {
-				var head *Knot = &rope[knotIdx-1]
-				var tail *Knot = &rope[knotIdx]
+				head := &rope[knotIdx-1]
+				tail := &rope[knotIdx]
 
 				tailNeighbors := map[[2]int]bool{
 					{tail.x, tail.y}:         true, // same position
