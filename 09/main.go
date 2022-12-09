@@ -37,8 +37,6 @@ func main() {
 		steps, _ := strconv.Atoi(string(command[2:]))
 
 		for i := 0; i < steps; i++ {
-			prevHeadX, prevHeadY := rope.headX, rope.headY
-
 			// apply head movement.
 			switch dir {
 			case "R":
@@ -65,24 +63,31 @@ func main() {
 
 			// move tail if head is no longer its neighbor (or in same position).
 			if !tailNeighbors[[2]int{rope.headX, rope.headY}] {
+				// if head and tail don't share a row or column, we need the tail to move diagonally.
+				sameRow := rope.headY == rope.tailY
+				sameCol := rope.headX == rope.tailX
 
-				// move tail in same direction if head is 2 steps away from same direction.
-				if (rope.headX == rope.tailX && Abs(rope.headY-rope.tailY) == 2) ||
-					(rope.headY == rope.tailY && Abs(rope.headX-rope.tailX) == 2) {
-					switch dir {
-					case "R":
-						rope.tailX++
-					case "L":
-						rope.tailX--
-					case "U":
-						rope.tailY++
-					case "D":
-						rope.tailY--
+				switch dir {
+				case "R":
+					rope.tailX++
+					if !(sameCol || sameRow) {
+						rope.tailY = rope.headY
 					}
-				} else {
-					// if rope ends aren't in same position, they must be 2 steps away diagonally;
-					// replace tail position with prior head position.
-					rope.tailX, rope.tailY = prevHeadX, prevHeadY
+				case "L":
+					rope.tailX--
+					if !(sameCol || sameRow) {
+						rope.tailY = rope.headY
+					}
+				case "U":
+					rope.tailY++
+					if !(sameCol || sameRow) {
+						rope.tailX = rope.headX
+					}
+				case "D":
+					rope.tailY--
+					if !(sameCol || sameRow) {
+						rope.tailX = rope.headX
+					}
 				}
 			}
 
