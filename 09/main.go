@@ -47,6 +47,7 @@ func moveRope(nKnots int, commands []string) []Knot {
 				ropeHead.y--
 			}
 
+			// apply movement for all other knots.
 			for knotIdx := 1; knotIdx < nKnots; knotIdx++ {
 				var head *Knot = &rope[knotIdx-1]
 				var tail *Knot = &rope[knotIdx]
