@@ -8,9 +8,8 @@ import (
 )
 
 type Knot struct {
-	x                 int
-	y                 int
-	distinctPositions map[[2]int]bool
+	x int
+	y int
 }
 
 func Abs(x int) int {
@@ -21,15 +20,17 @@ func Abs(x int) int {
 }
 
 // issues commands to move the head of a rope with N number of knots.
-// returns the state of each knot in the rope.
-func moveRope(nKnots int, commands []string) []Knot {
+// returns the positions visited by the final knot in the rope.
+func moveRope(nKnots int, commands []string) int {
 	var rope []Knot
 	for i := 0; i < nKnots; i++ {
-		rope = append(rope, Knot{0, 0, map[[2]int]bool{{0, 0}: true}})
+		rope = append(rope, Knot{0, 0})
 	}
 
 	var ropeHead *Knot = &rope[0]
+	var ropeTail *Knot = &rope[nKnots-1]
 
+	tailPositions := map[[2]int]bool{{0, 0}: true}
 	for _, command := range commands {
 		dir := string(command[0])
 		steps, _ := strconv.Atoi(string(command[2:]))
@@ -64,8 +65,12 @@ func moveRope(nKnots int, commands []string) []Knot {
 					{tail.x - 1, tail.y - 1}: true, // downleft
 				}
 
-				// move tail in direction of head if head is not a neighbor.
-				if !tailNeighbors[[2]int{head.x, head.y}] {
+				if tailNeighbors[[2]int{head.x, head.y}] {
+					// if the head is a neighbor, this knot doesn't need to move.
+					// if this knot doesn't need to move, neither do the knots further down the rope.
+					break
+				} else {
+					// move tail in direction of head if head is not a neighbor.
 					if tail.x != head.x {
 						tail.x += (head.x - tail.x) / Abs(head.x-tail.x)
 					}
@@ -74,14 +79,14 @@ func moveRope(nKnots int, commands []string) []Knot {
 						tail.y += (head.y - tail.y) / Abs(head.y-tail.y)
 					}
 				}
-
-				tail.distinctPositions[[2]int{tail.x, tail.y}] = true
-
 			}
+
+			tailPositions[[2]int{ropeTail.x, ropeTail.y}] = true
+
 		}
 	}
 
-	return rope
+	return len(tailPositions)
 }
 
 func main() {
@@ -94,10 +99,8 @@ func main() {
 	commands := strings.Split(string(file), "\n")
 
 	// part 1
-	movedRope2Knots := moveRope(2, commands)
-	fmt.Println(len(movedRope2Knots[len(movedRope2Knots)-1].distinctPositions))
+	fmt.Println(moveRope(2, commands))
 
 	// part 2
-	movedRope10Knots := moveRope(10, commands)
-	fmt.Println(len(movedRope10Knots[len(movedRope10Knots)-1].distinctPositions))
+	fmt.Println(moveRope(10, commands))
 }
