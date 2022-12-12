@@ -66,12 +66,10 @@ func parseInput(input string) map[int]*monkey {
 func inspectLoop(monkies map[int]*monkey, inspectCounts []int) {
 	for mId := 0; mId < len(monkies); mId++ {
 		m := monkies[mId]
-		fmt.Printf("Monkey %d:", mId)
 
 		for len(m.itemWorries) > 0 {
 			itm := m.popItem()
 			inspectCounts[mId]++
-			fmt.Printf("  Monkey inspects an item with a worry level of %d.\n", itm)
 
 			var rhs int
 			if m.opRHS == "old" {
@@ -80,30 +78,63 @@ func inspectLoop(monkies map[int]*monkey, inspectCounts []int) {
 				rhs, _ = strconv.Atoi(m.opRHS)
 			}
 
-			var operation string
 			switch m.operator {
 			case "+":
-				operation = "is multiplied by"
 				itm += rhs
 			case "*":
-				operation = "increases by"
 				itm *= rhs
 			}
-			fmt.Printf("    Worry level %s %d to %d.\n", operation, rhs, itm)
 
 			itm /= 3
-			fmt.Printf("    Monkey gets bored with item. Worry level is divided by 3 to %d.\n", itm)
 
 			var nextMonkyId int
 			if itm%m.divTest == 0 {
-				fmt.Printf("    Current worry level is divisible by %d.\n", m.divTest)
 				nextMonkyId = m.trueMonkey
 			} else {
-				fmt.Printf("    Current worry level is not divisible by %d.\n", m.divTest)
 				nextMonkyId = m.falseMonkey
 			}
 
-			fmt.Printf("    Item with worry level %d is thrown to monkey %d.\n", itm, nextMonkyId)
+			next := monkies[nextMonkyId]
+			next.pushItem(itm)
+
+		}
+	}
+
+}
+
+func inspectLoopManagable(monkies map[int]*monkey, inspectCounts []int) {
+	mod := 1
+	for _, m := range monkies {
+		mod *= m.divTest
+	}
+
+	for mId := 0; mId < len(monkies); mId++ {
+		m := monkies[mId]
+
+		for len(m.itemWorries) > 0 {
+			itm := m.popItem() % mod
+			inspectCounts[mId]++
+
+			var rhs int
+			if m.opRHS == "old" {
+				rhs = itm
+			} else {
+				rhs, _ = strconv.Atoi(m.opRHS)
+			}
+
+			switch m.operator {
+			case "+":
+				itm += rhs
+			case "*":
+				itm *= rhs
+			}
+
+			var nextMonkyId int
+			if itm%m.divTest == 0 {
+				nextMonkyId = m.trueMonkey
+			} else {
+				nextMonkyId = m.falseMonkey
+			}
 
 			next := monkies[nextMonkyId]
 			next.pushItem(itm)
@@ -120,6 +151,7 @@ func main() {
 		fmt.Printf("Could not read the file due to error: %s \n", err)
 	}
 
+	// part 1
 	monkies := parseInput(string(file))
 	inspectCounts := make([]int, len(monkies))
 	for i := 0; i < 20; i++ {
@@ -127,7 +159,17 @@ func main() {
 	}
 
 	sort.Sort(sort.Reverse(sort.IntSlice(inspectCounts)))
-
 	fmt.Printf("\n20 round stuff-slinging simian shenanigan level: %d\n", inspectCounts[0]*inspectCounts[1])
+
+	// part 2
+	monkies = parseInput(string(file))
+	inspectCounts = make([]int, len(monkies))
+	for i := 0; i < 10000; i++ {
+		inspectLoopManagable(monkies, inspectCounts)
+	}
+
+	sort.Sort(sort.Reverse(sort.IntSlice(inspectCounts)))
+
+	fmt.Printf("10000 round stuff-slinging simian shenanigan level: %d\n", inspectCounts[0]*inspectCounts[1])
 
 }
