@@ -56,6 +56,39 @@ func convertRuneToPriority(char rune) int {
 	return priority
 }
 
+// identifies the common item appearing across three rucksacks.
+func compareRucksacks(r1 string, r2 string, r3 string) rune {
+
+	// make maps of each rune in string.
+	m1 := make(map[rune]bool)
+	for _, char := range r1 {
+		m1[char] = true
+	}
+
+	m2 := make(map[rune]bool)
+	for _, char := range r2 {
+		m2[char] = true
+	}
+
+	m3 := make(map[rune]bool)
+	for _, char := range r3 {
+		m3[char] = true
+	}
+
+	// find common rune in each map.
+	var commonRune rune
+	for char, _ := range m1 {
+		_, ok2 := m2[char]
+		_, ok3 := m3[char]
+		if ok2 && ok3 {
+			commonRune = char
+			break
+		}
+	}
+
+	return commonRune
+}
+
 func main() {
 	inputFile := os.Args[1]
 	file, err := os.ReadFile(inputFile)
@@ -65,10 +98,23 @@ func main() {
 
 	fileContent := string(file)
 
+	// part 1
 	prioritySum := 0
 	for _, rucksack := range strings.Split(fileContent, "\n") {
 		commonElement := compareCompartments(rucksack)
 		prioritySum += convertRuneToPriority((commonElement))
+	}
+
+	fmt.Println(prioritySum)
+
+	// part 2
+	fileLines := strings.Split(fileContent, "\n")
+	prioritySum = 0
+	for i := 0; i < len(fileLines); i += 3 {
+		r1 := fileLines[i]
+		r2 := fileLines[i+1]
+		r3 := fileLines[i+2]
+		prioritySum += convertRuneToPriority(compareRucksacks(r1, r2, r3))
 	}
 
 	fmt.Println(prioritySum)

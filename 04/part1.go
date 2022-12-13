@@ -31,11 +31,24 @@ func parseAssignmentPair(pair string) (assignment, assignment) {
 
 // Compare assignment pairs for overlapping assignments.
 // Returns 1 if pairs overlap completely, 0 otherwise.
-func checkAssignmentsOverlap(a1 assignment, a2 assignment) int {
+func checkAssignmentsOverlapPart1(a1 assignment, a2 assignment) int {
 	overlap := 0
 
 	if a1.low <= a2.low && a1.high >= a2.high ||
 		a2.low <= a1.low && a2.high >= a1.high {
+		overlap = 1
+	}
+
+	return overlap
+}
+
+// Compare assignment pairs for overlapping assignments.
+// Returns 1 if pairs partially overlap, 0 otherwise.
+func checkAssignmentsOverlapPart2(a1 assignment, a2 assignment) int {
+	overlap := 0
+
+	if a1.high >= a2.low && a1.low <= a2.low ||
+		a2.high >= a1.low && a2.low <= a1.low {
 		overlap = 1
 	}
 
@@ -51,10 +64,19 @@ func main() {
 
 	fileContent := string(file)
 
+	// part 1
 	overlappingAssignmentPairs := 0
 	for _, pair := range strings.Split(fileContent, "\n") {
 		a1, a2 := parseAssignmentPair(pair)
-		overlappingAssignmentPairs += checkAssignmentsOverlap(a1, a2)
+		overlappingAssignmentPairs += checkAssignmentsOverlapPart1(a1, a2)
+	}
+	fmt.Println(overlappingAssignmentPairs)
+
+	// part 2
+	overlappingAssignmentPairs = 0
+	for _, pair := range strings.Split(fileContent, "\n") {
+		a1, a2 := parseAssignmentPair(pair)
+		overlappingAssignmentPairs += checkAssignmentsOverlapPart2(a1, a2)
 	}
 	fmt.Println(overlappingAssignmentPairs)
 }

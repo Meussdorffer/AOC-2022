@@ -18,6 +18,22 @@ func main() {
 	fileContent := string(file)
 	contentGroups := strings.Split(fileContent, "\n\n")
 
+	// part 1
+	maxCalories := 0
+	for _, line := range strings.Split(fileContent, "\n\n") {
+		elfCalories := 0
+		for _, val := range strings.Split(line, "\n") {
+			calories, _ := strconv.Atoi(val)
+			elfCalories += calories
+		}
+
+		if elfCalories >= maxCalories {
+			maxCalories = elfCalories
+		}
+	}
+	fmt.Println(maxCalories)
+
+	// part 2
 	elfCalories := make([]int, len(contentGroups))
 	for i, line := range contentGroups {
 		for _, val := range strings.Split(line, "\n") {
