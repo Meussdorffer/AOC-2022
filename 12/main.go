@@ -6,44 +6,47 @@ import (
 	"strings"
 )
 
-func getNeighbors(x int, y int, grid [][]string) [][2]int {
+func getNeighbors(x int, y int, grid [][]rune) [][2]int {
 	var neighbors [][2]int
 	height := grid[x][y]
 
 	rows := len(grid)
 	cols := len(grid[0])
-	if x+1 < rows && rune(grid[x+1][y])-height {
+	if x+1 < rows && grid[x+1][y]-height <= 1 {
 		neighbors = append(neighbors, [2]int{x + 1, y})
 	}
 
-	if x-1 >= 0 {
+	if x-1 >= 0 && grid[x-1][y]-height <= 1 {
 		neighbors = append(neighbors, [2]int{x - 1, y})
 	}
 
-	if y+1 < cols {
+	if y+1 < cols && grid[x][y+1]-height <= 1 {
 		neighbors = append(neighbors, [2]int{x, y + 1})
 	}
 
-	if y-1 >= 0 {
+	if y-1 >= 0 && grid[x][y-1]-height <= 1 {
 		neighbors = append(neighbors, [2]int{x, y - 1})
 	}
 
 	return neighbors
 }
 
-func parseInput(input string) ([][]string, int, int) {
-	var grid [][]string
+func parseInput(input string) ([][]rune, int, int) {
+	var grid [][]rune
 	x, y := -1, -1
 	for rowIdx, line := range strings.Split(input, "\n") {
-		row := strings.Split(line, "")
+		row := []rune(line)
 		grid = append(grid, row)
 
 		if x == -1 {
 			for colIdx, cell := range row {
-				if cell == "S" {
+				if cell == rune('S') {
 					x = rowIdx
 					y = colIdx
-					break
+					grid[x][y] = rune('a')
+				}
+				if cell == rune('E') {
+					grid[rowIdx][colIdx] = rune('z')
 				}
 			}
 		}
@@ -66,7 +69,7 @@ func parseInput(input string) ([][]string, int, int) {
 // 12                  w.parent := v
 // 13                  Q.enqueue(w)
 
-func pathBfs(grid [][]string, x int, y int) int {
+func pathBfs(grid [][]rune, x int, y int) int {
 	q := Queue{}
 	explored := map[[2]int]bool{{x, y}: true}
 	parents := make(map[[2]int][2]int)
@@ -78,9 +81,7 @@ func pathBfs(grid [][]string, x int, y int) int {
 		node, _ := q.Dequeue()
 		nX, nY := node[0], node[1]
 
-		fmt.Printf("Exploring node %s", grid[nX][nY])
-
-		if grid[nX][nY] == "E" {
+		if grid[nX][nY] == rune('E') {
 			goalNode = [2]int{nX, nY}
 			break
 		}
